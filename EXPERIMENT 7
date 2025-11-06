@@ -1,0 +1,66 @@
+//Experiment No 7
+//Divide and Conquer (Merge Sort) 
+//Sort Online Orders by Delivery Time using Merge Sort.
+//Problem Statement: You are given a list of online orders, each with an estimated delivery //time in minutes. Write a program to sort these orders using the Merge Sort algorithm so the
+//delivery system can prioritize quicker deliveries first.
+# ---------------------------------------------------------------
+# Divide and Conquer Example: Merge Sort
+# Problem: Sort Online Orders by Delivery Time (Ascending Order)
+# ---------------------------------------------------------------
+# Time Complexity: O(n log n)
+# Space Complexity: O(n)
+# Approach: Divide → Conquer → Combine
+# ---------------------------------------------------------------
+
+def merge_sort(orders):
+    """
+    Function to perform Merge Sort on a list of delivery times.
+    :param orders: list of integers representing delivery times in minutes
+    :return: sorted list of delivery times (ascending)
+    """
+    if len(orders) > 1:
+        mid = len(orders) // 2  # Divide array into two halves
+        left_half = orders[:mid]
+        right_half = orders[mid:]
+
+        # Recursive sort for each half
+        merge_sort(left_half)
+        merge_sort(right_half)
+
+        # Merge step
+        i = j = k = 0
+        while i < len(left_half) and j < len(right_half):
+            if left_half[i] < right_half[j]:
+                orders[k] = left_half[i]
+                i += 1
+            else:
+                orders[k] = right_half[j]
+                j += 1
+            k += 1
+
+        # Copy remaining elements
+        while i < len(left_half):
+            orders[k] = left_half[i]
+            i += 1
+            k += 1
+
+        while j < len(right_half):
+            orders[k] = right_half[j]
+            j += 1
+            k += 1
+
+    return orders
+
+
+# ---------------------------------------------------------------
+# Example: Sorting Online Orders by Delivery Time
+# ---------------------------------------------------------------
+if __name__ == "__main__":
+    # Example input: delivery times in minutes
+    delivery_times = [45, 12, 30, 60, 25, 15, 10]
+    
+    print("🚚 Online Orders - Delivery Times (Unsorted):", delivery_times)
+    sorted_orders = merge_sort(delivery_times)
+    print("✅ Online Orders Sorted by Delivery Time (Ascending):", sorted_orders)
+
+
