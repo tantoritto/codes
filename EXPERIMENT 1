@@ -1,0 +1,157 @@
+//Searching and Sorting Exp1
+//Design a program to maintain a student database that performs the following tasks:
+//1. Add and store student details (ID, Name, CGPA) using dynamically allocated memory.
+//2. Expand the student list using realloc() as new entries are added.
+//3. Implement Linear Search and Binary Search to find student records by ID.
+//4. Implement at least two Sorting Algorithms (Bubble Sort, Selection Sort, or Insertion Sort) //to sort student records by:
+//a. Name (Alphabetically)
+//b. CGPA (Ascending/Descending)
+//5.Analyze and compare the performance of search operations before and after sorting.
+
+
+/*
+------------------------------------------------------------
+DSA Experiment: Searching and Sorting on Student Database
+------------------------------------------------------------
+Features:
+1. Dynamically allocate memory for student records
+2. Use realloc() to expand list as needed
+3. Linear Search & Binary Search (by ID)
+4. Sorting:
+   a. By Name (Alphabetically)
+   b. By CGPA (Ascending/Descending)
+5. Compare performance before and after sorting
+------------------------------------------------------------
+Author: [Your Name]
+Compiler: DEV C++ / GCC
+------------------------------------------------------------
+*/
+
+#include <iostream>
+#include <cstring>
+#include <cstdlib>
+#include <utility>
+using namespace std;
+
+struct Student { int id; char name[50]; float cgpa; };
+
+// --- Decls ---
+void addStudent(Student *&a, int &n);
+void displayStudents(Student *a, int n);
+int  linearSearch(Student *a, int n, int id);
+int  binarySearch(Student *a, int n, int id);
+void bubbleSortByName(Student *a, int n);
+void selectionSortByCGPA(Student *a, int n, bool asc);
+void analyzeSearchPerformance(Student *a, int n);
+
+// --- Main ---
+int main() {
+    Student *students = NULL; int count = 0, choice, id;
+    do {
+        cout << "\n====== STUDENT DATABASE MENU ======"
+             << "\n1. Add Student"
+             << "\n2. Display All Students"
+             << "\n3. Linear Search by ID"
+             << "\n4. Sort by Name (Alphabetically - Bubble Sort)"
+             << "\n5. Sort by CGPA (Selection Sort)"
+             << "\n6. Binary Search by ID (After Sorting by ID)"
+             << "\n7. Analyze Search Performance"
+             << "\n0. Exit"
+             << "\nEnter your choice: ";
+        cin >> choice;
+
+        switch (choice) {
+            case 1: addStudent(students, count); break;
+            case 2: displayStudents(students, count); break;
+            case 3:
+                cout << "Enter Student ID to Search: "; cin >> id;
+                if (int p = linearSearch(students, count, id); p != -1)
+                    cout << "Found: " << students[p].name << " (CGPA: " << students[p].cgpa << ")\n";
+                else  cout << "Student not found!\n";
+                break;
+            case 4: bubbleSortByName(students, count);
+                    cout << "Students sorted alphabetically by name.\n"; break;
+            case 5: {
+                    int order; cout << "1. Ascending\n2. Descending\nChoose order: "; cin >> order;
+                    selectionSortByCGPA(students, count, order == 1);
+                    cout << "Students sorted by CGPA.\n"; } break;
+            case 6:
+                cout << "Enter Student ID to search (Binary Search): "; cin >> id;
+                if (int p = binarySearch(students, count, id); p != -1)
+                    cout << "Found: " << students[p].name << " (CGPA: " << students[p].cgpa << ")\n";
+                else  cout << "Student not found!\n";
+                break;
+            case 7: analyzeSearchPerformance(students, count); break;
+            case 0: cout << "Exiting program...\n"; break;
+            default: cout << "Invalid choice!\n";
+        }
+    } while (choice != 0);
+    free(students);
+    return 0;
+}
+
+// --- Defs ---
+void addStudent(Student *&a, int &n) {
+    a = (Student*)realloc(a, (n + 1) * sizeof(Student));
+    if (!a) { cout << "Memory allocation failed!\n"; return; }
+    cout << "Enter Student ID: "; cin >> a[n].id;
+    cout << "Enter Student Name: "; cin.ignore(); cin.getline(a[n].name, 50);
+    cout << "Enter CGPA: "; cin >> a[n].cgpa;
+    ++n; cout << "Student added successfully!\n";
+}
+
+void displayStudents(Student *a, int n) {
+    if (!n) { cout << "No student records available.\n"; return; }
+    cout << "\n===== Student Records =====\n";
+    for (int i = 0; i < n; ++i)
+        cout << "ID: " << a[i].id << "\tName: " << a[i].name << "\tCGPA: " << a[i].cgpa << '\n';
+}
+
+int linearSearch(Student *a, int n, int id) {
+    for (int i = 0; i < n; ++i) if (a[i].id == id) return i;
+    return -1;
+}
+
+int binarySearch(Student *a, int n, int id) {
+    int lo = 0, hi = n - 1;
+    while (lo <= hi) {
+        int mid = (lo + hi) / 2;
+        if (a[mid].id == id) return mid;
+        (a[mid].id < id) ? lo = mid + 1 : hi = mid - 1;
+    }
+    return -1;
+}
+
+void bubbleSortByName(Student *a, int n) {
+    for (int i = 0; i < n - 1; ++i)
+        for (int j = 0; j < n - i - 1; ++j)
+            if (strcmp(a[j].name, a[j + 1].name) > 0) swap(a[j], a[j + 1]);
+}
+
+void selectionSortByCGPA(Student *a, int n, bool asc) {
+    for (int i = 0; i < n - 1; ++i) {
+        int k = i;
+        for (int j = i + 1; j < n; ++j)
+            if (asc ? (a[j].cgpa < a[k].cgpa) : (a[j].cgpa > a[k].cgpa)) k = j;
+        if (k != i) swap(a[i], a[k]);
+    }
+}
+
+void analyzeSearchPerformance(Student *a, int n) {
+    if (!n) { cout << "Add students first!\n"; return; }
+    int id; cout << "Enter ID to search for performance analysis: "; cin >> id;
+
+    cout << "\n-- Linear Search (Unsorted) --\n";
+    if (int p = linearSearch(a, n, id); p != -1) cout << "Found: " << a[p].name << "\n";
+    else cout << "Not found.\n";
+
+    cout << "\n-- Sorting by ID before Binary Search --\n";
+    // Bubble sort by ID (simple, in-place)
+    for (int i = 0; i < n - 1; ++i)
+        for (int j = 0; j < n - i - 1; ++j)
+            if (a[j].id > a[j + 1].id) swap(a[j], a[j + 1]);
+
+    cout << "\n-- Binary Search (Sorted) --\n";
+    if (int p = binarySearch(a, n, id); p != -1) cout << "Found: " << a[p].name << "\n";
+    else cout << "Not found.\n";
+}
