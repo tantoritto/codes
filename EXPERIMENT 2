@@ -4,141 +4,85 @@
 #include <iostream>
 #include <string>
 #include <algorithm>
+#include <cctype>   // <-- add this
 using namespace std;
 
-// Node structure for Stack
-struct Node {
-    char data;
-    Node* next;
-};
-
-// Stack class using Linked List
+struct Node { char data; Node* next; };
 class Stack {
-private:
     Node* top;
 public:
-    Stack() { top = NULL; }
-
-    void push(char x) {
-        Node* temp = new Node;
-        if (!temp) {
-            cout << "Stack Overflow\n";
-            return;
-        }
-        temp->data = x;
-        temp->next = top;
-        top = temp;
+    Stack(): top(NULL) {}
+    void push(char x){ Node* t = new Node; t->data=x; t->next=top; top=t; }
+    char pop(){
+        if (isEmpty()){ cout<<"Stack Underflow\n"; return '\0'; }
+        Node* t=top; char v=t->data; top=top->next; delete t; return v;
     }
-
-    char pop() {
-        if (isEmpty()) {
-            cout << "Stack Underflow\n";
-            return '\0';
-        }
-        Node* temp = top;
-        char popped = temp->data;
-        top = top->next;
-        delete temp;
-        return popped;
-    }
-
-    char peek() {
-        if (!isEmpty())
-            return top->data;
-        else
-            return '\0';
-    }
-
-    bool isEmpty() {
-        return top == NULL;
-    }
+    char peek(){ return isEmpty() ? '\0' : top->data; }
+    bool isEmpty(){ return top==NULL; }
 };
 
-// Function to check if character is operator
-bool isOperator(char c) {
-    return (c == '+' || c == '-' || c == '*' || c == '/' || c == '^');
+bool isOperator(char c){ return c=='+'||c=='-'||c=='*'||c=='/'||c=='^'; }
+int precedence(char c){
+    if (c=='^') return 3;
+    if (c=='*'||c=='/') return 2;
+    if (c=='+'||c=='-') return 1;
+    return -1;
 }
+bool isLeftAssoc(char c){ return c!='^'; } // ^ is right-associative
 
-// Function to return precedence of operators
-int precedence(char c) {
-    if (c == '^')
-        return 3;
-    else if (c == '*' || c == '/')
-        return 2;
-    else if (c == '+' || c == '-')
-        return 1;
-    else
-        return -1;
-}
-
-// Function to convert Infix → Postfix
-string infixToPostfix(string infix) {
-    Stack s;
-    string postfix = "";
-
-    for (char c : infix) {
-        if (isalnum(c)) {
-            postfix += c; // Operand → directly add to result
-        }
-        else if (c == '(') {
+string infixToPostfix(const string& infix){
+    Stack s; string out;
+    for(char c: infix){
+        if (std::isspace(static_cast<unsigned char>(c))) continue; // allow spaces
+        if (std::isalnum(static_cast<unsigned char>(c))){
+            out += c;
+        } else if (c=='('){
             s.push(c);
-        }
-        else if (c == ')') {
-            while (!s.isEmpty() && s.peek() != '(') {
-                postfix += s.pop();
-            }
-            s.pop(); // Remove '('
-        }
-        else if (isOperator(c)) {
-            while (!s.isEmpty() && precedence(s.peek()) >= precedence(c)) {
-                postfix += s.pop();
+        } else if (c==')'){
+            while (!s.isEmpty() && s.peek()!='(') out += s.pop();
+            if (s.isEmpty()){ cout<<"Mismatched parentheses\n"; return out; }
+            s.pop(); // pop '('
+        } else if (isOperator(c)){
+            while (!s.isEmpty() && isOperator(s.peek()) &&
+                   (precedence(s.peek()) > precedence(c) ||
+                   (precedence(s.peek()) == precedence(c) && isLeftAssoc(c)))){
+                out += s.pop();
             }
             s.push(c);
         }
     }
-
-    // Pop remaining operators
-    while (!s.isEmpty()) {
-        postfix += s.pop();
+    while (!s.isEmpty()){
+        if (s.peek()=='('||s.peek()==')'){ cout<<"Mismatched parentheses\n"; s.pop(); continue; }
+        out += s.pop();
     }
-
-    return postfix;
+    return out;
 }
 
-// Function to reverse a string and swap ( ) for prefix conversion
-string reverseInfix(string exp) {
+string reverseInfix(string exp){
     reverse(exp.begin(), exp.end());
-    for (int i = 0; i < exp.size(); i++) {
-        if (exp[i] == '(')
-            exp[i] = ')';
-        else if (exp[i] == ')')
-            exp[i] = '(';
+    for (size_t i=0;i<exp.size();++i){
+        if (exp[i]=='(') exp[i]=')';
+        else if (exp[i]==')') exp[i]='(';
     }
     return exp;
 }
-
-// Function to convert Infix → Prefix
-string infixToPrefix(string infix) {
-    string reversedInfix = reverseInfix(infix);
-    string postfix = infixToPostfix(reversedInfix);
-    reverse(postfix.begin(), postfix.end());
-    return postfix;
+string infixToPrefix(const string& infix){
+    string r = reverseInfix(infix);
+    string post = infixToPostfix(r);
+    reverse(post.begin(), post.end());
+    return post;
 }
 
-// Main Function
-int main() {
+int main(){
     string infix;
     cout << "Enter Infix Expression: ";
-    cin >> infix;
+    getline(cin, infix); // supports spaces
 
     string postfix = infixToPostfix(infix);
-    string prefix = infixToPrefix(infix);
+    string prefix  = infixToPrefix(infix);
 
-    cout << "\nInfix Expression: " << infix;
-    cout << "\nPostfix Expression: " << postfix;
-    cout << "\nPrefix Expression: " << prefix << endl;
-
+    cout << "\nInfix Expression: "  << infix
+         << "\nPostfix Expression: " << postfix
+         << "\nPrefix  Expression: " << prefix << endl;
     return 0;
 }
-
-
