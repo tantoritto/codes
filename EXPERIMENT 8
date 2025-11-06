@@ -1,0 +1,79 @@
+//Experiment No8
+//Greedy Algorithm (Fractional Knapsack) 
+//Maximize Profit by Shipping Partial Orders (Fractional Knapsack)
+//Problem Statement: You run a shipping company and need to load a truck with parcels of
+//different weights and profits. The truck has a limited weight capacity. Write a program to
+//choose parcels (even partially) to maximize profit using the Fractional Knapsack strategy.
+# ---------------------------------------------------------------
+# Greedy Algorithm: Fractional Knapsack
+# Problem: Maximize Profit by Shipping Partial Orders
+# ---------------------------------------------------------------
+# Time Complexity: O(n log n) (for sorting)
+# Space Complexity: O(1)
+# ---------------------------------------------------------------
+
+class Item:
+    def __init__(self, weight, profit):
+        self.weight = weight
+        self.profit = profit
+        self.ratio = profit / weight  # Profit-to-weight ratio
+
+
+def fractional_knapsack(items, capacity):
+    """
+    Function to maximize profit using the Fractional Knapsack approach.
+    :param items: list of Item objects (weight, profit)
+    :param capacity: maximum weight truck can carry
+    :return: maximum profit achievable
+    """
+    # Step 1: Sort items based on profit/weight ratio (descending)
+    items.sort(key=lambda x: x.ratio, reverse=True)
+
+    total_profit = 0.0
+    remaining_capacity = capacity
+
+    print(f"Truck Capacity: {capacity} kg")
+    print("------------------------------------------------")
+    print("Item\tWeight\tProfit\tProfit/Weight")
+    for i, item in enumerate(items, start=1):
+        print(f"{i}\t{item.weight}\t{item.profit}\t{item.ratio:.2f}")
+    print("------------------------------------------------")
+
+    # Step 2: Pick items greedily
+    for item in items:
+        if remaining_capacity == 0:
+            break
+
+        # If item can fit completely, take it
+        if item.weight <= remaining_capacity:
+            total_profit += item.profit
+            remaining_capacity -= item.weight
+            print(f"Took full item (Weight={item.weight}, Profit={item.profit})")
+        else:
+            # Take only the fraction that fits
+            fraction = remaining_capacity / item.weight
+            total_profit += item.profit * fraction
+            print(f"Took {fraction*100:.1f}% of item (Weight={remaining_capacity}, Profit={item.profit * fraction:.2f})")
+            remaining_capacity = 0  # Knapsack is full
+
+    print("------------------------------------------------")
+    print(f"💰 Maximum Profit = {total_profit:.2f}")
+    return total_profit
+
+
+# ---------------------------------------------------------------
+# Example: Shipping Company Parcels
+# ---------------------------------------------------------------
+if __name__ == "__main__":
+    # Each parcel has a weight (kg) and profit (₹)
+    parcels = [
+        Item(10, 60),   # Parcel 1
+        Item(20, 100),  # Parcel 2
+        Item(30, 120)   # Parcel 3
+    ]
+
+    truck_capacity = 50  # Truck can carry max 50 kg
+    fractional_knapsack(parcels, truck_capacity)
+
+
+
