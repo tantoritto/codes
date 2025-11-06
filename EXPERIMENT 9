@@ -1,0 +1,56 @@
+# ---------------------------------------------------------------
+# Exp 9  String Processing: Naïve String Matching Algorithm
+# ---------------------------------------------------------------
+# Problem Statement:
+# Given a text string and a pattern string, find all starting indices
+# in the text where the pattern occurs exactly.
+# ---------------------------------------------------------------
+# Time Complexity: O((n - m + 1) * m)
+# Space Complexity: O(1)
+# ---------------------------------------------------------------
+
+def naive_string_matching(text, pattern):
+    """
+    Function to find all occurrences of 'pattern' in 'text'
+    using the Naïve String Matching Algorithm.
+    
+    :param text: The main text string (length n)
+    :param pattern: The pattern to be searched (length m)
+    :return: List of starting indices where pattern is found
+    """
+    n = len(text)
+    m = len(pattern)
+    indices = []
+
+    print(f"🔍 Searching for pattern '{pattern}' in text '{text}'")
+
+    # Loop over all possible shifts of pattern within text
+    for i in range(n - m + 1):  # up to n-m inclusive
+        match = True
+        for j in range(m):
+            if text[i + j] != pattern[j]:
+                match = False
+                break
+        if match:
+            indices.append(i)
+            print(f"✅ Pattern found at index {i}")
+    if not indices:
+        print("❌ No match found.")
+    return indices
+
+# ---------------------------------------------------------------
+# Example Execution
+# ---------------------------------------------------------------
+if __name__ == "__main__":
+    # Input text and pattern
+    text = "ABAAABCDBBABCDDEABCABCD"
+    pattern = "ABC"
+
+    result = naive_string_matching(text, pattern)
+
+    print("------------------------------------------------")
+    print(f"📄 Text: {text}")
+    print(f"🔎 Pattern: {pattern}")
+    print(f"📍 Pattern found at indices: {result}")
+
+
